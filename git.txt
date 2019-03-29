@@ -1,0 +1,103 @@
+8. git push origin branchA //push到远程，如果远程有新的修改，先做一下git pull
+Git鼓励大量使用分支：
+查看分支：git branch
+创建分支：git branch <name>
+切换分支：git checkout <name>
+创建+切换分支：git checkout -b <name>
+合并某分支到当前分支：git merge <name>
+删除分支：git branch -d <name>
+
+原理：推送一个空分支到远程分支，其实就相当于删除远程分支（自己感悟）
+方式一：通过代码删除
+命令：$ git push origin 【空格】【冒号】【需要删除的分支名字】
+比如我github上有master和feature分支，我现在想着删除feature分支，命令如下：
+$ git push origin :feature
+
+ok，这样你github上的远程分支就被删除了。别问为什么，就是删除了！！！
+
+
+PS D:\code> git add .\README.md
+PS D:\code> git commit -m 'readme file conflict fixed'  .\README.md
+fatal: cannot do a partial commit during a merge.
+PS D:\code> git add .\README.md
+PS D:\code> git status
+On branch master
+Your branch is ahead of 'origin/master' by 2 commits.
+  (use "git push" to publish your local commits)
+
+All conflicts fixed but you are still merging.
+  (use "git commit" to conclude merge)
+
+Changes to be committed:
+
+        modified:   README.md
+
+PS D:\code> git commit -m 'conflict fixed' .\README.md
+fatal: cannot do a partial commit during a merge.
+PS D:\code> git status
+On branch master
+Your branch is ahead of 'origin/master' by 2 commits.
+  (use "git push" to publish your local commits)
+
+All conflicts fixed but you are still merging.
+  (use "git commit" to conclude merge)
+
+Changes to be committed:
+
+        modified:   README.md
+
+PS D:\code>
+
+$ git checkout master
+Switched to branch 'master'
+Your branch is ahead of 'origin/master' by 6 commits.
+  (use "git push" to publish your local commits)
+
+$ git checkout -b issue-101
+Switched to a new branch 'issue-101'
+现在修复bug，需要把“Git is free software ...”改为“Git is a free software ...”，然后提交：
+$ git add readme.txt 
+$ git commit -m "fix bug 101"
+[issue-101 4c805e2] fix bug 101
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+修复完成后，切换到master分支，并完成合并，最后删除issue-101分支：
+$ git checkout master
+Switched to branch 'master'
+Your branch is ahead of 'origin/master' by 6 commits.
+  (use "git push" to publish your local commits)
+
+$ git merge --no-ff -m "merged bug fix 101" issue-101
+Merge made by the 'recursive' strategy.
+ readme.txt | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+太棒了，原计划两个小时的bug修复只花了5分钟！现在，是时候接着回到dev分支干活了！
+$ git checkout dev
+Switched to branch 'dev'
+
+$ git status
+On branch dev
+nothing to commit, working tree clean
+工作区是干净的，刚才的工作现场存到哪去了？用git stash list命令看看：
+$ git stash list
+stash@{0}: WIP on dev: f52c633 add merge
+工作现场还在，Git把stash内容存在某个地方了，但是需要恢复一下，有两个办法：
+一是用git stash apply恢复，但是恢复后，stash内容并不删除，你需要用git stash drop来删除；
+另一种方式是用git stash pop，恢复的同时把stash内容也删了：
+$ git stash pop
+On branch dev
+Changes to be committed:
+  (use "git reset HEAD <file>..." to unstage)
+
+    new file:   hello.py
+
+Changes not staged for commit:
+  (use "git add <file>..." to update what will be committed)
+  (use "git checkout -- <file>..." to discard changes in working directory)
+
+    modified:   readme.txt
+
+Dropped refs/stash@{0} (5d677e2ee266f39ea296182fb2354265b91b3b2a)
+再用git stash list查看，就看不到任何stash内容了：
+$ git stash list
+你可以多次stash，恢复的时候，先用git stash list查看，然后恢复指定的stash，用命令：
+$ git stash apply stash@{0}
